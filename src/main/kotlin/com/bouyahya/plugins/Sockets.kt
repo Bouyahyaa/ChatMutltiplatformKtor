@@ -19,7 +19,7 @@ fun Application.configureSockets() {
 
     routing {
         val sessions = Collections.synchronizedSet<Session?>(LinkedHashSet())
-        webSocket("/chat") {
+        webSocket("/chat/{userId}/{username}") {
             println("Connected!")
             val currentSession = Session(this)
             sessions += currentSession
