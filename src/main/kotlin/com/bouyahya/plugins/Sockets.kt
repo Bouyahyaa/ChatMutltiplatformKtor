@@ -25,7 +25,7 @@ fun Application.configureSockets() {
         val users = Collections.synchronizedSet<User?>(LinkedHashSet())
         webSocket("/chat/{userId}/{username}") {
             println("Connected!")
-            val currentSession = Session(this)
+            val currentSession = Session(current = this, userId = call.parameters["userId"]!!.toLong())
             sessions.add(currentSession)
             val currentUser = User(id = call.parameters["userId"]!!.toLong(), username = call.parameters["username"]!!)
             users.add(currentUser)
@@ -48,6 +48,8 @@ fun Application.configureSockets() {
             } finally {
                 println("Disconnected!")
                 val disconnectedUser = users.first { it.id == call.parameters["userId"]!!.toLong() }
+                val disconnectedSession = sessions.first { it.userId == call.parameters["userId"]!!.toLong() }
+                sessions.remove(disconnectedSession)
                 users.remove(disconnectedUser)
                 sessions.forEach {
                     it.current.send(Json.encodeToString(users.map { user -> user!! }))
