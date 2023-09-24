@@ -1,5 +1,6 @@
 package com.bouyahya.plugins
 
+import com.bouyahya.Constants.toFormattedUrlGet
 import com.bouyahya.models.Session
 import com.bouyahya.models.User
 import io.ktor.server.application.*
@@ -23,11 +24,15 @@ fun Application.configureSockets() {
     routing {
         val sessions = Collections.synchronizedSet<Session?>(LinkedHashSet())
         val users = Collections.synchronizedSet<User?>(LinkedHashSet())
-        webSocket("/chat/{userId}/{username}") {
+        webSocket("/chat/{userId}/{username}/{profileImage}") {
             println("Connected!")
             val currentSession = Session(current = this, userId = call.parameters["userId"]!!.toLong())
             sessions.add(currentSession)
-            val currentUser = User(id = call.parameters["userId"]!!.toLong(), username = call.parameters["username"]!!)
+            val currentUser = User(
+                id = call.parameters["userId"]!!.toLong(),
+                username = call.parameters["username"]!!,
+                profileImage = call.parameters["profileImage"]!!.toFormattedUrlGet(),
+            )
             users.add(currentUser)
             try {
                 send("You are connected!")
